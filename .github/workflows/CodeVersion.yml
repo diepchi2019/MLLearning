@@ -8,13 +8,14 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write   # required but NOT sufficient alone
+      contents: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.BYPASS_TOKEN }}
+          fetch-depth: 0   # 🔑 IMPORTANT: get full history
 
       - name: Update version file
         run: |
@@ -28,5 +29,9 @@ jobs:
           git config user.email "github-actions@github.com"
 
           git add version
-          git commit -m "chore: bump version [skip ci]" || echo "No changes to commit"
+          git commit -m "chore: bump version [skip ci]" || exit 0
+
+          # 🔑 FIX: sync with remote before pushing
+          git pull --rebase origin main
+
           git push origin main
