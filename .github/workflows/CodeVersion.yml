@@ -3,7 +3,7 @@ name: Generate Version on PR
 on:
   pull_request:
     branches:
-      - staging
+      - main
     types:
       - opened
       - synchronize
