@@ -1,37 +1,26 @@
-name: CodeVersion
-
-on:
-  workflow_dispatch:
-
 jobs:
-  build:
+  version:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
-
     steps:
-      - name: Checkout repository
+      - name: Checkout PR source branch
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.BYPASS_TOKEN }}
-          fetch-depth: 0   # 🔑 IMPORTANT: get full history
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
 
-      - name: Update version file
+      - name: Generate version file
         run: |
           VERSION=$(date +%Y.%m.%d.%H%M)
           echo "$VERSION" > version
-          echo "New version: $VERSION"
+          echo "Generated version: $VERSION"
 
-      - name: Commit and push version
+      - name: Commit version to source branch
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
           git add version
-          git commit -m "chore: bump version [skip ci]" || exit 0
+          git commit -m "chore: add version file [skip ci]" || exit 0
 
-          # 🔑 FIX: sync with remote before pushing
-          git pull --rebase origin main
-
-          git push origin main
+          git push origin HEAD:${{ github.head_ref }}
